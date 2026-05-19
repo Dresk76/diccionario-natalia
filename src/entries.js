@@ -40,4 +40,11 @@ export const ENTRIES = [
     example: "Estabas en el supermercado concentrado en los precios y ni me viste. Llegó a casa y dijo: «yo te vi, yo te vi, tú no me viste».",
     date: "2026-05-17",
   },
+  {
+    id: "feroz",
+    word: "Feroz",
+    definition: "Adjetivo que usa para describir a alguien muy feo o muy fea. No es un insulto dicho con crueldad — es una evaluación estética directa, sin filtro, con la naturalidad de quien simplemente constata un hecho.",
+    example: "Vieron a alguien por la calle y soltó sin rodeos: «ese man está muy feroz».",
+    date: "2026-05-19",
+  },
 ];
