@@ -16,7 +16,7 @@ export const ENTRIES = [
     id: "aonde",
     word: "Aonde",
     definition: "Como decir «¿a dónde vamos?» o «¿a dónde está tal cosa?»",
-    example: "¿Aonde dejaste las llaves?",
+    example: "¿Aonde están las llaves?",
     date: "2026-05-17",
   },
   {
