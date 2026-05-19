@@ -1,0 +1,70 @@
+# =============================================
+# DEPENDENCIAS
+# Carpeta generada al correr npm install
+# =============================================
+node_modules/
+
+# =============================================
+# BUILD — Carpeta generada al correr npm run build
+# GitHub Actions la genera sola, no se sube al repo
+# =============================================
+dist/
+
+# =============================================
+# VITE — Caché interno de Vite
+# =============================================
+.vite/
+*.local
+
+# =============================================
+# VARIABLES DE ENTORNO
+# Si en algún momento agregás claves o configs
+# privadas, van en estos archivos y NO se suben
+# =============================================
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+# =============================================
+# LOGS
+# =============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =============================================
+# SISTEMA OPERATIVO
+# Archivos que genera Windows, Mac o Linux
+# automáticamente — no tienen nada que ver con el código
+# =============================================
+.DS_Store          # Mac
+Thumbs.db          # Windows
+desktop.ini        # Windows
+
+# =============================================
+# EDITORES DE CÓDIGO
+# Configuración local de VS Code u otros editores
+# =============================================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# =============================================
+# TYPESCRIPT — No usamos TS en este proyecto
+# pero por si se agrega después
+# =============================================
+*.tsbuildinfo
+
+# =============================================
+# NPM
+# =============================================
+.npm
+*.tgz
+.yarn-integrity
