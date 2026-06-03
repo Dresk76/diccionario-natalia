@@ -319,6 +319,52 @@ body {
 }
 
 /* =============================================
+   PAGINACIÓN — Navegación entre páginas
+   ============================================= */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  max-width: 620px;
+  margin: 8px auto 0;
+  padding: 0 16px;
+}
+
+/* Botón individual de página */
+.pagination__btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--card-radius);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  font-family: var(--font-main);
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Página activa — resaltada con el acento dorado */
+.pagination__btn--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Botón deshabilitado — anterior en página 1, siguiente en última */
+.pagination__btn--disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* =============================================
    FOOTER — Pie de página
    ============================================= */
 .footer {
@@ -376,6 +422,13 @@ body {
   .card__word {
     font-size: 19px;
   }
+
+  /* Botones de paginación más pequeños en móvil */
+  .pagination__btn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
 }
 
 /* Pantallas grandes — hover solo en desktop para no quedarse pegado en móvil */
@@ -383,5 +436,10 @@ body {
   .card:hover {
     box-shadow: var(--card-shadow-open);
     transform: translateY(-1px);
+  }
+
+  .pagination__btn:not(.pagination__btn--disabled):not(.pagination__btn--active):hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 }

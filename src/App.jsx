@@ -2,9 +2,12 @@ import { useState } from "react";
 import { ENTRIES } from "./entries.js";
 import "./styles.css";
 
+const ENTRIES_PER_PAGE = 7;
+
 export default function App() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const entries = [...ENTRIES].sort((a, b) =>
     a.word.localeCompare(b.word, "es")
@@ -15,6 +18,23 @@ export default function App() {
       e.word.toLowerCase().includes(search.toLowerCase()) ||
       e.definition.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Resetea a página 1 cuando se busca
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Cálculo de páginas
+  const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE);
+  const startIndex = (currentPage - 1) * ENTRIES_PER_PAGE;
+  const currentEntries = filtered.slice(startIndex, startIndex + ENTRIES_PER_PAGE);
+
+  // Scroll al tope al cambiar de página
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <>
@@ -37,7 +57,7 @@ export default function App() {
           <input
             className="search-input"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleSearch}
             placeholder="Buscar en el diccionario..."
             type="search"
           />
@@ -49,8 +69,10 @@ export default function App() {
         {filtered.length === 0 ? (
           <p className="entries-empty">No se encontró ninguna entrada.</p>
         ) : (
-          filtered.map((entry, i) => {
+          currentEntries.map((entry, i) => {
             const isOpen = open === entry.id;
+            // Número real en el diccionario completo ordenado
+            const realIndex = entries.findIndex((e) => e.id === entry.id);
             return (
               <div
                 key={entry.id}
@@ -61,7 +83,7 @@ export default function App() {
                 <div className="card__header">
                   <div>
                     <span className="card__number">
-                      {String(i + 1).padStart(2, "0")}
+                      {String(realIndex + 1).padStart(2, "0")}
                     </span>
                     <h2 className="card__word">{entry.word}</h2>
                   </div>
@@ -88,6 +110,41 @@ export default function App() {
           })
         )}
       </div>
+
+      {/* PAGINACIÓN — solo aparece si hay más de una página */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          {/* Botón anterior */}
+          <button
+            className={`pagination__btn ${currentPage === 1 ? "pagination__btn--disabled" : ""}`}
+            onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+            aria-label="Página anterior"
+          >
+            ‹
+          </button>
+
+          {/* Números de página */}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              className={`pagination__btn ${currentPage === page ? "pagination__btn--active" : ""}`}
+              onClick={() => handlePageChange(page)}
+              aria-label={`Página ${page}`}
+            >
+              {page}
+            </button>
+          ))}
+
+          {/* Botón siguiente */}
+          <button
+            className={`pagination__btn ${currentPage === totalPages ? "pagination__btn--disabled" : ""}`}
+            onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+            aria-label="Página siguiente"
+          >
+            ›
+          </button>
+        </div>
+      )}
 
       {/* PIE DE PÁGINA */}
       <footer className="footer">
