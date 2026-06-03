@@ -8,22 +8,42 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeLetter, setActiveLetter] = useState(null);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState(null); // Controla qué card mostró el mensaje de copiado
 
+  // Entradas ordenadas alfabéticamente
   const entries = [...ENTRIES].sort((a, b) =>
     a.word.localeCompare(b.word, "es")
   );
 
-  const filtered = entries.filter(
-    (e) =>
-      e.word.toLowerCase().includes(search.toLowerCase()) ||
-      e.definition.toLowerCase().includes(search.toLowerCase())
-  );
+  // Letras únicas disponibles en el diccionario
+  const activeLetters = [...new Set(
+    entries.map((e) => e.word[0].toUpperCase())
+  )].sort();
 
-  // Resetea a página 1 cuando se busca
+  // Resetea a página 1 al buscar
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setCurrentPage(1);
   };
+
+  // Alterna el filtro por letra — si ya está activa la desactiva
+  const handleLetterClick = (letter) => {
+    setActiveLetter(activeLetter === letter ? null : letter);
+    setCurrentPage(1);
+  };
+
+  // Aplica filtro de búsqueda y filtro de letra
+  const filtered = entries.filter((e) => {
+    const matchesSearch =
+      e.word.toLowerCase().includes(search.toLowerCase()) ||
+      e.definition.toLowerCase().includes(search.toLowerCase());
+    const matchesLetter = activeLetter
+      ? e.word[0].toUpperCase() === activeLetter
+      : true;
+    return matchesSearch && matchesLetter;
+  });
 
   // Cálculo de páginas
   const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE);
@@ -36,19 +56,87 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Arma el texto para compartir
+  const buildShareText = (entry) => {
+    return `📖 *${entry.word}*\n\n${entry.definition}\n\n_Ejemplo: ${entry.example}_\n\n— Diccionario de Natalia`;
+  };
+
+  // Comparte por WhatsApp
+  const handleWhatsApp = (e, entry) => {
+    e.stopPropagation(); // Evita abrir/cerrar la card al tocar el botón
+    const text = encodeURIComponent(buildShareText(entry));
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  };
+
+  // Copia al portapapeles y muestra confirmación por 2 segundos
+  const handleCopy = (e, entry) => {
+    e.stopPropagation(); // Evita abrir/cerrar la card al tocar el botón
+    navigator.clipboard.writeText(buildShareText(entry)).then(() => {
+      setCopiedId(entry.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
+
   return (
     <>
       {/* ENCABEZADO */}
       <header className="header">
         <div className="header__top-bar" />
         <div className="header__bottom-bar" />
+
+        {/* Foto de perfil — abre el lightbox al hacer click */}
+        <div
+          className="header__avatar-wrapper"
+          onClick={() => setPhotoOpen(true)}
+          aria-label="Ver foto de perfil"
+        >
+          <img
+            src="./images/profile/natalia.jpeg"
+            alt="Natalia"
+            className="header__avatar"
+          />
+        </div>
+
         <p className="header__subtitle">Vocabulario personal de</p>
         <h1 className="header__title">Natalia</h1>
         <div className="header__divider" />
         <p className="header__count">
-          {ENTRIES.length} {ENTRIES.length === 1 ? "entrada" : "entradas"}
+          {ENTRIES.length} palabras que la definen
         </p>
+
+        {/* Letras activas — filtro por inicial */}
+        <div className="header__letters">
+          {activeLetters.map((letter) => (
+            <button
+              key={letter}
+              className={`header__letter ${activeLetter === letter ? "header__letter--active" : ""}`}
+              onClick={() => handleLetterClick(letter)}
+              aria-label={`Filtrar por letra ${letter}`}
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
       </header>
+
+      {/* LIGHTBOX — previsualización de la foto de perfil */}
+      {photoOpen && (
+        <div
+          className="lightbox"
+          onClick={() => setPhotoOpen(false)}
+          aria-label="Cerrar foto"
+        >
+          <button className="lightbox__close" onClick={() => setPhotoOpen(false)}>
+            ×
+          </button>
+          <img
+            src="./images/profile/natalia.jpeg"
+            alt="Natalia"
+            className="lightbox__img"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* BUSCADOR */}
       <div className="search-wrapper">
@@ -69,9 +157,8 @@ export default function App() {
         {filtered.length === 0 ? (
           <p className="entries-empty">No se encontró ninguna entrada.</p>
         ) : (
-          currentEntries.map((entry, i) => {
+          currentEntries.map((entry) => {
             const isOpen = open === entry.id;
-            // Número real en el diccionario completo ordenado
             const realIndex = entries.findIndex((e) => e.id === entry.id);
             return (
               <div
@@ -105,6 +192,32 @@ export default function App() {
 
                 {/* Fecha de registro */}
                 <p className="card__date">{entry.date}</p>
+
+                {/* Botones de compartir — visibles siempre */}
+                <div className="card__share">
+
+                  {/* Botón WhatsApp */}
+                  <button
+                    className="card__share-btn card__share-btn--whatsapp"
+                    onClick={(e) => handleWhatsApp(e, entry)}
+                    aria-label="Compartir por WhatsApp"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    WhatsApp
+                  </button>
+
+                  {/* Botón Copiar — cambia a "¡Copiado!" por 2 segundos */}
+                  <button
+                    className={`card__share-btn card__share-btn--copy ${copiedId === entry.id ? "card__share-btn--copied" : ""}`}
+                    onClick={(e) => handleCopy(e, entry)}
+                    aria-label="Copiar al portapapeles"
+                  >
+                    {copiedId === entry.id ? "¡Copiado!" : "Copiar"}
+                  </button>
+
+                </div>
               </div>
             );
           })
@@ -114,6 +227,7 @@ export default function App() {
       {/* PAGINACIÓN — solo aparece si hay más de una página */}
       {totalPages > 1 && (
         <div className="pagination">
+
           {/* Botón anterior */}
           <button
             className={`pagination__btn ${currentPage === 1 ? "pagination__btn--disabled" : ""}`}
@@ -143,6 +257,7 @@ export default function App() {
           >
             ›
           </button>
+
         </div>
       )}
 

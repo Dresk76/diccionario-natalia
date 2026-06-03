@@ -92,6 +92,27 @@ body {
   background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
 }
 
+/* Contenedor de la foto de perfil — círculo con borde dorado */
+.header__avatar-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent);
+  padding: 3px;
+  margin: 0 auto 16px;
+  background: var(--color-header-bg);
+  cursor: pointer; /* Indica que la foto es clickeable */
+}
+
+/* Foto de perfil — circular */
+.header__avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;   /* Recorta la foto para que llene el círculo sin deformarse */
+  display: block;
+}
+
 /* Texto pequeño "Vocabulario personal de" */
 .header__subtitle {
   color: var(--color-accent);
@@ -118,11 +139,91 @@ body {
   margin: 14px auto;
 }
 
-/* Texto "X entradas" debajo del título */
+/* Texto "X palabras que la definen" debajo del título */
 .header__count {
   color: var(--color-text-muted);
   font-size: 13px;
   font-style: italic;
+}
+
+/* Contenedor de letras activas del abecedario */
+.header__letters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 0 20px;
+}
+
+/* Cada letra inicial que tiene al menos una entrada */
+.header__letter {
+  background: transparent;
+  border: 1px solid rgba(200, 150, 62, 0.3);
+  border-radius: 4px;
+  color: var(--color-accent-light);
+  font-family: var(--font-main);
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Letra seleccionada — resaltada con el acento dorado */
+.header__letter--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* =============================================
+   LIGHTBOX — Previsualización de la foto de perfil
+   ============================================= */
+
+/* Fondo oscuro que cubre toda la pantalla */
+.lightbox {
+  position: fixed;
+  inset: 0;                          /* Cubre top, right, bottom, left en una sola línea */
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;                      /* Por encima de todo el contenido */
+  animation: fadeIn 0.2s ease;
+  cursor: pointer;                   /* Indica que tocar fuera cierra el lightbox */
+}
+
+/* Foto ampliada dentro del lightbox */
+.lightbox__img {
+  max-width: 90vw;                   /* No supera el 90% del ancho de la pantalla */
+  max-height: 85vh;                  /* No supera el 85% del alto de la pantalla */
+  border-radius: 8px;
+  border: 2px solid var(--color-accent);
+  object-fit: contain;               /* Muestra la foto completa sin recortar */
+  cursor: default;                   /* La foto en sí no cierra el lightbox */
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Botón × para cerrar el lightbox */
+.lightbox__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(45, 26, 14, 0.7);
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+  color: var(--color-accent-light);
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  line-height: 1;
 }
 
 /* =============================================
@@ -166,6 +267,7 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s;
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
   -webkit-appearance: none; /* Elimina estilos nativos en iOS */
+  appearance: none;
 }
 
 /* Estado activo del buscador — resalta con el color acento */
@@ -211,7 +313,8 @@ body {
   transition: box-shadow 0.2s ease, transform 0.15s ease;
   box-shadow: var(--card-shadow);
   -webkit-tap-highlight-color: transparent; /* Elimina el flash azul al tocar en móvil */
-  user-select: none; /* Evita que se seleccione texto al hacer tap rápido */
+  user-select: none;     /* Evita que se seleccione texto al hacer tap rápido */
+  appearance: none;
   animation: fadeIn 0.3s ease both; /* Aparece suavemente al cargar */
 }
 
@@ -319,6 +422,56 @@ body {
 }
 
 /* =============================================
+   BOTONES DE COMPARTIR — Dentro de cada card
+   ============================================= */
+
+/* Contenedor de los botones — fila alineada a la derecha */
+.card__share {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border); /* Línea separadora sobre los botones */
+}
+
+/* Base de cada botón de compartir */
+.card__share-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;       /* Bordes muy redondeados — estilo pill */
+  font-family: var(--font-main);
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Botón WhatsApp */
+.card__share-btn--whatsapp {
+  color: #25d366;
+  border-color: rgba(37, 211, 102, 0.3);
+}
+
+/* Botón Copiar */
+.card__share-btn--copy {
+  color: var(--color-accent);
+  border-color: rgba(200, 150, 62, 0.3);
+}
+
+/* Estado copiado — confirma la acción visualmente */
+.card__share-btn--copied {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* =============================================
    PAGINACIÓN — Navegación entre páginas
    ============================================= */
 .pagination {
@@ -401,6 +554,8 @@ body {
 
 /* =============================================
    RESPONSIVE — Ajustes por tamaño de pantalla
+   Todo lo que depende del tamaño de pantalla
+   va aquí — nunca crear @media sueltos arriba.
    ============================================= */
 
 /* Pantallas pequeñas — celulares */
@@ -431,15 +586,49 @@ body {
   }
 }
 
-/* Pantallas grandes — hover solo en desktop para no quedarse pegado en móvil */
+/* Pantallas grandes — todos los hovers van aquí
+   para que no queden pegados en móvil al tocar */
 @media (min-width: 768px) {
+
+  /* Hover de tarjeta */
   .card:hover {
     box-shadow: var(--card-shadow-open);
     transform: translateY(-1px);
   }
 
+  /* Hover de letras del filtro */
+  .header__letter:hover {
+    background: rgba(200, 150, 62, 0.15);
+    border-color: var(--color-accent);
+    color: var(--color-accent-light);
+  }
+
+  .header__letter--active:hover {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  /* Hover del botón cerrar del lightbox */
+  .lightbox__close:hover {
+    background: var(--color-accent);
+    color: #fff;
+  }
+
+  /* Hover de paginación */
   .pagination__btn:not(.pagination__btn--disabled):not(.pagination__btn--active):hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
+  }
+
+  /* Hover botón WhatsApp */
+  .card__share-btn--whatsapp:hover {
+    background: rgba(37, 211, 102, 0.1);
+    border-color: #25d366;
+  }
+
+  /* Hover botón Copiar */
+  .card__share-btn--copy:hover {
+    background: rgba(200, 150, 62, 0.1);
+    border-color: var(--color-accent);
   }
 }
