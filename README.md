@@ -48,11 +48,21 @@ Abrí el archivo `src/entries.js` y agregá un bloque nuevo al final de la lista
 {
   id: "nombre-unico-sin-espacios",
   word: "La palabra o frase",
+  category: "Cariño",
   definition: "Qué significa y en qué contexto la usa.",
   example: "Frase de ejemplo de cómo la usa.",
   date: "2026-05-17",
 },
 ```
+
+**Descripción de cada campo:**
+
+- **`id`** — identificador único en minúsculas y con guiones, sin espacios ni caracteres especiales
+- **`word`** — la palabra o frase exacta tal como la dice Natalia
+- **`category`** — categoría de la entrada. Valores disponibles: `Cariño`, `Cotidiano`, `Humor`, `Mascotas`, `Observación`, `Protesta`
+- **`definition`** — qué significa y en qué contexto la usa
+- **`example`** — una situación concreta y real de cómo la usa
+- **`date`** — fecha en que se registró la entrada por primera vez. **Nunca se modifica**, aunque luego se edite la definición o el ejemplo. Representa el día que se quiso guardar esa palabra
 
 Después hacé commit y push — GitHub Actions reconstruye y despliega automáticamente.
 

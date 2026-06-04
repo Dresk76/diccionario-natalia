@@ -4,6 +4,12 @@ import "./styles.css";
 
 const ENTRIES_PER_PAGE = 7;
 
+// Extrae la letra inicial ignorando signos de puntuación al inicio
+// Ej: "¡A peresha..." → "A", "Aonde" → "A"
+const getInitialLetter = (word) => {
+  return word.replace(/^[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+/, "")[0]?.toUpperCase() ?? "?";
+};
+
 export default function App() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(null);
@@ -19,7 +25,7 @@ export default function App() {
 
   // Letras únicas disponibles en el diccionario
   const activeLetters = [...new Set(
-    entries.map((e) => e.word[0].toUpperCase())
+    entries.map((e) => getInitialLetter(e.word))
   )].sort();
 
   // Resetea a página 1 al buscar
@@ -28,9 +34,14 @@ export default function App() {
     setCurrentPage(1);
   };
 
-  // Alterna el filtro por letra — si ya está activa la desactiva
+  // Alterna el filtro por letra — si ya está activa la desactiva y vuelve a All
+  // Si se toca All directamente, limpia el filtro
   const handleLetterClick = (letter) => {
-    setActiveLetter(activeLetter === letter ? null : letter);
+    if (letter === null) {
+      setActiveLetter(null);
+    } else {
+      setActiveLetter(activeLetter === letter ? null : letter);
+    }
     setCurrentPage(1);
   };
 
@@ -40,7 +51,7 @@ export default function App() {
       e.word.toLowerCase().includes(search.toLowerCase()) ||
       e.definition.toLowerCase().includes(search.toLowerCase());
     const matchesLetter = activeLetter
-      ? e.word[0].toUpperCase() === activeLetter
+      ? getInitialLetter(e.word) === activeLetter
       : true;
     return matchesSearch && matchesLetter;
   });
@@ -106,6 +117,16 @@ export default function App() {
 
         {/* Letras activas — filtro por inicial */}
         <div className="header__letters">
+          {/* Botón All — muestra todas las entradas, activo por defecto */}
+          <button
+            className={`header__letter ${activeLetter === null ? "header__letter--active" : ""}`}
+            onClick={() => handleLetterClick(null)}
+            aria-label="Mostrar todas las entradas"
+          >
+            All
+          </button>
+
+          {/* Botones de letra — filtran por inicial */}
           {activeLetters.map((letter) => (
             <button
               key={letter}
