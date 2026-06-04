@@ -15,6 +15,7 @@ export default function App() {
   const [open, setOpen] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeLetter, setActiveLetter] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [copiedId, setCopiedId] = useState(null); // Controla qué card mostró el mensaje de copiado
 
@@ -26,6 +27,11 @@ export default function App() {
   // Letras únicas disponibles en el diccionario
   const activeLetters = [...new Set(
     entries.map((e) => getInitialLetter(e.word))
+  )].sort();
+
+  // Categorías únicas disponibles en el diccionario, ordenadas alfabéticamente ← acá
+  const activeCategories = [...new Set(
+    entries.map((e) => e.category)
   )].sort();
 
   // Resetea a página 1 al buscar
@@ -45,7 +51,13 @@ export default function App() {
     setCurrentPage(1);
   };
 
-  // Aplica filtro de búsqueda y filtro de letra
+  // Alterna el filtro por categoría — si ya está activa la desactiva
+  const handleCategoryClick = (category) => {
+    setActiveCategory(activeCategory === category ? null : category);
+    setCurrentPage(1);
+  };
+
+  // Aplica filtro de búsqueda, letra y categoría
   const filtered = entries.filter((e) => {
     const matchesSearch =
       e.word.toLowerCase().includes(search.toLowerCase()) ||
@@ -53,7 +65,10 @@ export default function App() {
     const matchesLetter = activeLetter
       ? getInitialLetter(e.word) === activeLetter
       : true;
-    return matchesSearch && matchesLetter;
+    const matchesCategory = activeCategory
+      ? e.category === activeCategory
+      : true;
+    return matchesSearch && matchesLetter && matchesCategory;
   });
 
   // Cálculo de páginas
@@ -171,6 +186,20 @@ export default function App() {
             type="search"
           />
         </div>
+      </div>
+
+      {/* FILTRO POR CATEGORÍA — chips horizontales debajo del buscador */}
+      <div className="categories-wrapper">
+        {activeCategories.map((category) => (
+          <button
+            key={category}
+            className={`category-btn ${activeCategory === category ? "category-btn--active" : ""}`}
+            onClick={() => handleCategoryClick(category)}
+            aria-label={`Filtrar por categoría ${category}`}
+          >
+            {category}
+          </button>
+        ))}
       </div>
 
       {/* LISTA DE ENTRADAS */}

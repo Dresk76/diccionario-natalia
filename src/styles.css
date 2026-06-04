@@ -283,6 +283,50 @@ body {
 }
 
 /* =============================================
+   FILTRO DE CATEGORÍAS — Chips debajo del buscador
+   ============================================= */
+
+/* Contenedor con scroll horizontal para móvil */
+.categories-wrapper {
+  max-width: 620px;
+  margin: 12px auto 0;
+  padding: 0 16px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;             /* Scroll horizontal si no caben todas */
+  scrollbar-width: none;        /* Oculta el scrollbar en Firefox */
+  -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+}
+
+/* Oculta el scrollbar en Chrome y Safari */
+.categories-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* Chip individual de categoría */
+.category-btn {
+  flex-shrink: 0;               /* Evita que se achique — mantiene el texto en una línea */
+  padding: 6px 14px;
+  border-radius: 20px;          /* Forma pill */
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-muted);
+  font-family: var(--font-main);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;          /* Texto en una sola línea */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Categoría activa — resaltada con el acento dorado */
+.category-btn--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* =============================================
    LISTA DE ENTRADAS — Contenedor de las tarjetas
    ============================================= */
 .entries-wrapper {
@@ -630,5 +674,12 @@ body {
   .card__share-btn--copy:hover {
     background: rgba(200, 150, 62, 0.1);
     border-color: var(--color-accent);
+  }
+
+  /* Hover categorías */
+  .category-btn:not(.category-btn--active):hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(200, 150, 62, 0.08);
   }
 }
