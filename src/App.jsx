@@ -16,13 +16,19 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeLetter, setActiveLetter] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [activeYear, setActiveYear] = useState(null);   // ← año seleccionado
+  const [activeMonth, setActiveMonth] = useState(null); // ← mes seleccionado
+  const [sortOrder, setSortOrder] = useState("az"); // ← "az", "recent", "oldest"
   const [photoOpen, setPhotoOpen] = useState(false);
   const [copiedId, setCopiedId] = useState(null); // Controla qué card mostró el mensaje de copiado
 
-  // Entradas ordenadas alfabéticamente
-  const entries = [...ENTRIES].sort((a, b) =>
-    a.word.localeCompare(b.word, "es")
-  );
+  // Entradas ordenadas según el criterio seleccionado
+  const entries = [...ENTRIES].sort((a, b) => {
+    if (sortOrder === "az") return a.word.localeCompare(b.word, "es");
+    if (sortOrder === "recent") return new Date(b.date) - new Date(a.date);
+    if (sortOrder === "oldest") return new Date(a.date) - new Date(b.date);
+    return 0;
+  });
 
   // Letras únicas disponibles en el diccionario
   const activeLetters = [...new Set(
@@ -57,8 +63,29 @@ export default function App() {
     setCurrentPage(1);
   };
 
-  // Entradas filtradas solo por búsqueda y letra — sin categoría
-  // Se usa para calcular qué categorías mostrar sin que desaparezcan al seleccionar una
+  // Cambia el año activo — resetea el mes al cambiar de año
+  const handleYearClick = (year) => {
+    if (activeYear === year) {
+      setActiveYear(null);
+      setActiveMonth(null);
+    } else {
+      setActiveYear(year);
+      setActiveMonth(null); // ← resetea el mes al cambiar de año
+    }
+    setCurrentPage(1);
+  };
+
+  // Cambia el mes activo — mismo patrón que categorías
+  const handleMonthClick = (month) => {
+    if (activeMonth === month) {
+      setActiveMonth(null);
+    } else {
+      setActiveMonth(month);
+    }
+    setCurrentPage(1);
+  };
+
+  // Entradas filtradas por búsqueda, letra y fecha — sin categoría
   const filteredByLetterAndSearch = entries.filter((e) => {
     const matchesSearch =
       e.word.toLowerCase().includes(search.toLowerCase()) ||
@@ -66,13 +93,37 @@ export default function App() {
     const matchesLetter = activeLetter
       ? getInitialLetter(e.word) === activeLetter
       : true;
-    return matchesSearch && matchesLetter;
+    const matchesYear = activeYear
+      ? e.date.split("-")[0] === activeYear
+      : true;
+    const matchesMonth = activeMonth
+      ? e.date.split("-")[1] === activeMonth
+      : true;
+    return matchesSearch && matchesLetter && matchesYear && matchesMonth;
   });
 
   // Categorías únicas disponibles según letra y búsqueda — sin filtro de categoría
   // Así las otras categorías no desaparecen al seleccionar una
   const activeCategories = [...new Set(
     filteredByLetterAndSearch.map((e) => e.category)
+  )].sort();
+
+  // Años únicos disponibles en el diccionario, ordenados de más reciente a más antiguo
+  const activeYears = [...new Set(
+    entries.map((e) => e.date.split("-")[0])
+  )].sort((a, b) => b - a);
+
+  // Meses disponibles según el año seleccionado
+  // Si no hay año activo, muestra todos los meses disponibles
+  const MONTH_NAMES = [
+    "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  const activeMonths = [...new Set(
+    entries
+      .filter((e) => activeYear ? e.date.split("-")[0] === activeYear : true)
+      .map((e) => e.date.split("-")[1])
   )].sort();
 
   // Aplica filtro completo — búsqueda, letra y categoría
@@ -226,6 +277,94 @@ export default function App() {
 
       </div>
 
+      {/* FILTRO POR FECHA — chips de año y mes */}
+      {activeYears.length > 0 && (
+        <div className="date-filter-wrapper">
+
+          {/* Chips de año */}
+          <div className="date-filter-row">
+            <span className="date-filter-label">Año</span>
+            <div className="date-chips">
+
+              {/* Botón Todos los años */}
+              <button
+                className={`date-chip ${activeYear === null ? "date-chip--active" : ""}`}
+                onClick={() => { setActiveYear(null); setActiveMonth(null); setCurrentPage(1); }}
+                aria-label="Mostrar todos los años"
+              >
+                Todos
+              </button>
+
+              {activeYears.map((year) => (
+                <button
+                  key={year}
+                  className={`date-chip ${activeYear === year ? "date-chip--active" : ""}`}
+                  onClick={() => handleYearClick(year)}
+                  aria-label={`Filtrar por año ${year}`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chips de mes — solo aparecen si hay un año seleccionado */}
+          {activeYear && (
+            <div className="date-filter-row">
+              <span className="date-filter-label">Mes</span>
+              <div className="date-chips">
+
+                {/* Botón Todo el año */}
+                <button
+                  className={`date-chip ${activeMonth === null ? "date-chip--active" : ""}`}
+                  onClick={() => { setActiveMonth(null); setCurrentPage(1); }}
+                  aria-label="Mostrar todo el año"
+                >
+                  Todos
+                </button>
+
+                {activeMonths.map((month) => (
+                  <button
+                    key={month}
+                    className={`date-chip ${activeMonth === month ? "date-chip--active" : ""}`}
+                    onClick={() => handleMonthClick(month)}
+                    aria-label={`Filtrar por mes ${MONTH_NAMES[parseInt(month)]}`}
+                  >
+                    {MONTH_NAMES[parseInt(month)]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
+
+      {/* INDICADOR DE RESULTADOS — aparece cuando hay cualquier filtro activo ← acá */}
+      {(search || activeLetter || activeCategory || activeYear || activeMonth) && (
+        <p className="results-count">
+          {filtered.length === 0
+            ? "No se encontraron entradas"
+            : `${filtered.length} ${filtered.length === 1 ? "entrada encontrada" : "entradas encontradas"}`
+          }
+        </p>
+      )}
+
+      {/* ORDENAR — dropdown discreto encima de la lista ← acá */}
+      <div className="sort-wrapper">
+        <label className="sort-label" htmlFor="sort-select">Ordenar</label>
+        <select
+          id="sort-select"
+          className="sort-select"
+          value={sortOrder}
+          onChange={(e) => { setSortOrder(e.target.value); setCurrentPage(1); }}
+        >
+          <option value="az">A → Z</option>
+          <option value="recent">Más reciente</option>
+          <option value="oldest">Más antiguo</option>
+        </select>
+      </div>
+
       {/* LISTA DE ENTRADAS */}
       <div className="entries-wrapper">
         {filtered.length === 0 ? (
@@ -240,7 +379,12 @@ export default function App() {
             const currentLetter = getInitialLetter(entry.word);
             const prevEntry = currentEntries[index - 1];
             const prevLetter = prevEntry ? getInitialLetter(prevEntry.word) : null;
-            const showSeparator = !activeLetter && currentLetter !== prevLetter;
+            // Muestra separador solo cuando:
+            // - No hay filtro de letra activo
+            // - No hay búsqueda activa
+            // - No hay filtro de categoría activo
+            // - El orden es alfabético A→Z
+            const showSeparator = !activeLetter && !search && !activeCategory && sortOrder === "az" && currentLetter !== prevLetter;
 
             return (
               <div key={entry.id}>
