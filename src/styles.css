@@ -344,6 +344,41 @@ body {
 }
 
 /* =============================================
+   SEPARADOR DE LETRA — Aparece entre grupos
+   de entradas con distinta inicial
+   ============================================= */
+
+/* Contenedor del separador — fila con letra y línea */
+.letter-separator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 10px;
+}
+
+/* Primera aparición — sin margen superior extra */
+.letter-separator:first-child {
+  margin-top: 0;
+}
+
+/* Letra del separador */
+.letter-separator__letter {
+  color: var(--color-accent);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 400;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Línea horizontal que se extiende después de la letra */
+.letter-separator__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-border), transparent);
+}
+
+/* =============================================
    TARJETA DE ENTRADA — Cada palabra del diccionario
    ============================================= */
 .card {
