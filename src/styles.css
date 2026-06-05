@@ -777,8 +777,8 @@ body {
   position: fixed;
   bottom: 28px;
   right: 20px;
-  width: 42px;
-  height: 42px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: none;                              /* Sin borde nativo — lo maneja el SVG */
   background: transparent;                  /* Fondo transparente */
@@ -799,8 +799,8 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 42px;
-  height: 42px;
+  width: 60px;
+  height: 60px;
 }
 
 /* Círculo de fondo — sutil, siempre visible */
@@ -817,8 +817,8 @@ body {
 
 /* Ícono de flecha — centrado dentro del botón */
 .scroll-top__arrow {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   position: relative;
   z-index: 1;
 }
