@@ -16,11 +16,20 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeLetter, setActiveLetter] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
-  const [activeYear, setActiveYear] = useState(null);   // ← año seleccionado
-  const [activeMonth, setActiveMonth] = useState(null); // ← mes seleccionado
-  const [sortOrder, setSortOrder] = useState("az"); // ← "az", "recent", "oldest"
+  const [activeYear, setActiveYear] = useState(null);     // ← año seleccionado
+  const [activeMonth, setActiveMonth] = useState(null);   // ← mes seleccionado
+  const [sortOrder, setSortOrder] = useState("az");       // ← "az", "recent", "oldest"
   const [photoOpen, setPhotoOpen] = useState(false);
-  const [copiedId, setCopiedId] = useState(null); // Controla qué card mostró el mensaje de copiado
+  const [copiedId, setCopiedId] = useState(null);         // ← controla qué card mostró el mensaje de copiado
+  const [seenCards, setSeenCards] = useState(() => {
+    // Carga del localStorage las cards que ya fueron abiertas
+    // Así el pulso del + no vuelve a aparecer en visitas posteriores
+    try {
+      return new Set(JSON.parse(localStorage.getItem("seen-cards") || "[]"));
+    } catch {
+      return new Set();
+    }
+  });
 
   // Entradas ordenadas según el criterio seleccionado
   const entries = [...ENTRIES].sort((a, b) => {
@@ -30,9 +39,28 @@ export default function App() {
     return 0;
   });
 
-  // Letras únicas disponibles en el diccionario
+  // Letras únicas disponibles en el diccionario, ordenadas alfabéticamente
   const activeLetters = [...new Set(
     entries.map((e) => getInitialLetter(e.word))
+  )].sort();
+
+  // Nombres de los meses para mostrar en el filtro de fecha
+  const MONTH_NAMES = [
+    "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  // Años únicos disponibles, ordenados de más reciente a más antiguo
+  const activeYears = [...new Set(
+    entries.map((e) => e.date.split("-")[0])
+  )].sort((a, b) => b - a);
+
+  // Meses disponibles según el año seleccionado
+  // Si no hay año activo, muestra todos los meses disponibles
+  const activeMonths = [...new Set(
+    entries
+      .filter((e) => activeYear ? e.date.split("-")[0] === activeYear : true)
+      .map((e) => e.date.split("-")[1])
   )].sort();
 
   // Resetea a página 1 al buscar
@@ -41,8 +69,8 @@ export default function App() {
     setCurrentPage(1);
   };
 
-  // Alterna el filtro por letra — si ya está activa la desactiva y vuelve a All
-  // Si se toca All directamente, limpia el filtro
+  // Alterna el filtro por letra — si ya está activa la desactiva y vuelve a Todas
+  // Si se toca Todas directamente, limpia el filtro y resetea la categoría
   const handleLetterClick = (letter) => {
     if (letter === null) {
       setActiveLetter(null);
@@ -56,7 +84,7 @@ export default function App() {
   // Cambia la categoría activa — si tocás la misma la desactiva, si tocás otra cambia directo
   const handleCategoryClick = (category) => {
     if (activeCategory === category) {
-      setActiveCategory(null); // ← toca la misma = desactiva
+      setActiveCategory(null);
     } else {
       setActiveCategory(category);
     }
@@ -70,7 +98,7 @@ export default function App() {
       setActiveMonth(null);
     } else {
       setActiveYear(year);
-      setActiveMonth(null); // ← resetea el mes al cambiar de año
+      setActiveMonth(null);
     }
     setCurrentPage(1);
   };
@@ -86,6 +114,7 @@ export default function App() {
   };
 
   // Entradas filtradas por búsqueda, letra y fecha — sin categoría
+  // Se usa para calcular qué categorías mostrar sin que desaparezcan al seleccionar una
   const filteredByLetterAndSearch = entries.filter((e) => {
     const matchesSearch =
       e.word.toLowerCase().includes(search.toLowerCase()) ||
@@ -102,31 +131,13 @@ export default function App() {
     return matchesSearch && matchesLetter && matchesYear && matchesMonth;
   });
 
-  // Categorías únicas disponibles según letra y búsqueda — sin filtro de categoría
+  // Categorías únicas disponibles según letra, búsqueda y fecha — sin filtro de categoría
   // Así las otras categorías no desaparecen al seleccionar una
   const activeCategories = [...new Set(
     filteredByLetterAndSearch.map((e) => e.category)
   )].sort();
 
-  // Años únicos disponibles en el diccionario, ordenados de más reciente a más antiguo
-  const activeYears = [...new Set(
-    entries.map((e) => e.date.split("-")[0])
-  )].sort((a, b) => b - a);
-
-  // Meses disponibles según el año seleccionado
-  // Si no hay año activo, muestra todos los meses disponibles
-  const MONTH_NAMES = [
-    "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
-
-  const activeMonths = [...new Set(
-    entries
-      .filter((e) => activeYear ? e.date.split("-")[0] === activeYear : true)
-      .map((e) => e.date.split("-")[1])
-  )].sort();
-
-  // Aplica filtro completo — búsqueda, letra y categoría
+  // Aplica filtro completo — búsqueda, letra, fecha y categoría
   const filtered = filteredByLetterAndSearch.filter((e) => {
     const matchesCategory = activeCategory
       ? e.category === activeCategory
@@ -145,7 +156,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Arma el texto para compartir
+  // Arma el texto para compartir por WhatsApp o copiar
   const buildShareText = (entry) => {
     return `📖 *${entry.word}*\n\n${entry.definition}\n\n_Ejemplo: ${entry.example}_\n\n— Diccionario de Natalia`;
   };
@@ -195,6 +206,7 @@ export default function App() {
 
         {/* Letras activas — filtro por inicial */}
         <div className="header__letters">
+
           {/* Botón Todas — muestra todas las entradas, activo por defecto */}
           <button
             className={`header__letter ${activeLetter === null ? "header__letter--active" : ""}`}
@@ -215,6 +227,7 @@ export default function App() {
               {letter}
             </button>
           ))}
+
         </div>
       </header>
 
@@ -295,6 +308,7 @@ export default function App() {
                 Todos
               </button>
 
+              {/* Chips de año — filtran por año */}
               {activeYears.map((year) => (
                 <button
                   key={year}
@@ -305,6 +319,7 @@ export default function App() {
                   {year}
                 </button>
               ))}
+
             </div>
           </div>
 
@@ -314,7 +329,7 @@ export default function App() {
               <span className="date-filter-label">Mes</span>
               <div className="date-chips">
 
-                {/* Botón Todo el año */}
+                {/* Botón Todos los meses */}
                 <button
                   className={`date-chip ${activeMonth === null ? "date-chip--active" : ""}`}
                   onClick={() => { setActiveMonth(null); setCurrentPage(1); }}
@@ -323,6 +338,7 @@ export default function App() {
                   Todos
                 </button>
 
+                {/* Chips de mes — filtran por mes */}
                 {activeMonths.map((month) => (
                   <button
                     key={month}
@@ -333,6 +349,7 @@ export default function App() {
                     {MONTH_NAMES[parseInt(month)]}
                   </button>
                 ))}
+
               </div>
             </div>
           )}
@@ -340,7 +357,7 @@ export default function App() {
         </div>
       )}
 
-      {/* INDICADOR DE RESULTADOS — aparece cuando hay cualquier filtro activo ← acá */}
+      {/* INDICADOR DE RESULTADOS — aparece cuando hay cualquier filtro activo */}
       {(search || activeLetter || activeCategory || activeYear || activeMonth) && (
         <p className="results-count">
           {filtered.length === 0
@@ -350,7 +367,7 @@ export default function App() {
         </p>
       )}
 
-      {/* ORDENAR — dropdown discreto encima de la lista ← acá */}
+      {/* ORDENAR — dropdown alineado a la derecha encima de la lista */}
       <div className="sort-wrapper">
         <label className="sort-label" htmlFor="sort-select">Ordenar</label>
         <select
@@ -374,11 +391,11 @@ export default function App() {
             const isOpen = open === entry.id;
             const realIndex = entries.findIndex((e) => e.id === entry.id);
 
-            // Muestra separador de letra solo cuando no hay filtro de letra activo
-            // Compara la letra inicial de la entrada actual con la anterior
+            // Letra inicial de la entrada actual y la anterior
             const currentLetter = getInitialLetter(entry.word);
             const prevEntry = currentEntries[index - 1];
             const prevLetter = prevEntry ? getInitialLetter(prevEntry.word) : null;
+
             // Muestra separador solo cuando:
             // - No hay filtro de letra activo
             // - No hay búsqueda activa
@@ -397,11 +414,23 @@ export default function App() {
                   </div>
                 )}
 
+                {/* TARJETA DE ENTRADA */}
                 <div
                   className={`card ${isOpen ? "card--open" : ""}`}
-                  onClick={() => setOpen(isOpen ? null : entry.id)}
+                  onClick={() => {
+                    // Marca la card como vista y guarda en localStorage
+                    // El pulso del + no vuelve a aparecer después de abrir
+                    if (!seenCards.has(entry.id)) {
+                      const updated = new Set(seenCards);
+                      updated.add(entry.id);
+                      setSeenCards(updated);
+                      localStorage.setItem("seen-cards", JSON.stringify([...updated]));
+                    }
+                    setOpen(isOpen ? null : entry.id);
+                  }}
                 >
-                  {/* Número y palabra */}
+
+                  {/* Encabezado de la card — número, palabra y botón toggle */}
                   <div className="card__header">
                     <div>
                       <span className="card__number">
@@ -409,13 +438,19 @@ export default function App() {
                       </span>
                       <h2 className="card__word">{entry.word}</h2>
                     </div>
-                    <span className={`card__toggle ${isOpen ? "card__toggle--open" : ""}`}>
+                    {/* Botón + con pulso suave — pulsa solo si la card nunca fue abierta */}
+                    <span className={`card__toggle ${isOpen ? "card__toggle--open" : ""} ${!isOpen && !seenCards.has(entry.id) ? "card__toggle--pulse" : ""}`}>
                       +
                     </span>
                   </div>
 
                   {/* Definición — siempre visible */}
                   <p className="card__definition">{entry.definition}</p>
+
+                  {/* Hint "Ver ejemplo" — visible solo cuando la card está cerrada */}
+                  {!isOpen && entry.example && (
+                    <p className="card__hint">Ver ejemplo →</p>
+                  )}
 
                   {/* Ejemplo — solo visible al abrir la card */}
                   {isOpen && entry.example && (

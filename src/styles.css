@@ -591,6 +591,21 @@ body {
 }
 
 /* =============================================
+   HINT DE EJEMPLO — Texto que indica que hay
+   contenido adicional al tocar la card
+   ============================================= */
+
+/* Texto "Ver ejemplo →" — visible solo cuando la card está cerrada */
+.card__hint {
+  font-size: 12px;
+  color: var(--color-accent);
+  margin-top: 8px;
+  font-style: italic;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+/* =============================================
    BLOQUE DE EJEMPLO — Aparece al abrir la tarjeta
    ============================================= */
 .card__example {
@@ -762,6 +777,19 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Animación de pulso para el botón + */
+/* Llama la atención suavemente sin ser invasivo */
+@keyframes pulse {
+  0%   { transform: scale(1);    opacity: 1; }
+  50%  { transform: scale(1.25); opacity: 0.6; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* Clase que aplica el pulso — solo cuando la card está cerrada */
+.card__toggle--pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
 /* =============================================
    RESPONSIVE — Ajustes por tamaño de pantalla
    Todo lo que depende del tamaño de pantalla
@@ -859,5 +887,10 @@ body {
   /* Hover dropdown de orden */
   .sort-select:hover {
     border-color: var(--color-accent);
+  }
+
+  /* Hover hint de ejemplo */
+  .card:hover .card__hint {
+    opacity: 1;
   }
 }
