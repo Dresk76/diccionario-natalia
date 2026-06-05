@@ -433,6 +433,7 @@ export default function App() {
                 {/* TARJETA DE ENTRADA */}
                 <div
                   className={`card ${isOpen ? "card--open" : ""}`}
+                  style={{ animationDelay: `${index * 180}ms` }}
                   onClick={() => {
                     // Marca la card como vista y guarda en localStorage
                     // El pulso del + no vuelve a aparecer después de abrir

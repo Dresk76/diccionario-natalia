@@ -525,7 +525,7 @@ body {
   -webkit-tap-highlight-color: transparent; /* Elimina el flash azul al tocar en móvil */
   user-select: none;     /* Evita que se seleccione texto al hacer tap rápido */
   appearance: none;
-  animation: fadeIn 0.3s ease both; /* Aparece suavemente al cargar */
+  animation: fadeIn 0.8s ease both;
 }
 
 /* Feedback táctil al presionar en móvil */
@@ -829,7 +829,7 @@ body {
 
 /* Aparición suave de arriba hacia abajo */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
