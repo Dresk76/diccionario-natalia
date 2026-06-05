@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ENTRIES } from "./entries.js";
 import "./styles.css";
 
@@ -30,6 +30,22 @@ export default function App() {
       return new Set();
     }
   });
+
+  const [showScrollTop, setShowScrollTop] = useState(false); // ← controla visibilidad del botón
+  const [scrollProgress, setScrollProgress] = useState(0);   // ← progreso del scroll 0-100
+
+  // Calcula el progreso del scroll y muestra el botón al pasar 400px
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setScrollProgress(progress);
+      setShowScrollTop(scrollTop > 200);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Entradas ordenadas según el criterio seleccionado
   const entries = [...ENTRIES].sort((a, b) => {
@@ -537,6 +553,57 @@ export default function App() {
         <div className="footer__divider" />
         <p className="footer__text">Compilado con amor ✦</p>
       </footer>
+
+      {/* BOTÓN VOLVER ARRIBA — flotante con progreso circular */}
+      {showScrollTop && (
+        <button
+          className="scroll-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Volver arriba"
+        >
+          {/* Círculo de progreso — se llena según el scroll */}
+          <svg
+            className="scroll-top__ring"
+            viewBox="0 0 42 42"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Círculo de fondo — siempre visible, muy sutil */}
+            <circle
+              className="scroll-top__ring-bg"
+              cx="21" cy="21" r="19"
+              fill="none"
+              strokeWidth="2"
+            />
+            {/* Círculo de progreso — crece con el scroll */}
+            <circle
+              className="scroll-top__ring-fill"
+              cx="21" cy="21" r="19"
+              fill="none"
+              strokeWidth="2"
+              strokeDasharray="119.4"
+              strokeDashoffset={119.4 - (119.4 * scrollProgress) / 100}
+              strokeLinecap="round"
+              transform="rotate(-90 21 21)"
+            />
+          </svg>
+
+          {/* Ícono de flecha moderna */}
+          <svg
+            className="scroll-top__arrow"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+          >
+            <path
+              d="M12 19V5M5 12l7-7 7 7"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      )}
     </>
   );
 }

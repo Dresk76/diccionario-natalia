@@ -768,6 +768,62 @@ body {
 }
 
 /* =============================================
+   BOTÓN VOLVER ARRIBA — flotante con progreso
+   circular que se llena al scrollear
+   ============================================= */
+
+/* Botón flotante fijo en esquina inferior derecha */
+.scroll-top {
+  position: fixed;
+  bottom: 28px;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;                              /* Sin borde nativo — lo maneja el SVG */
+  background: transparent;                  /* Fondo transparente */
+  color: var(--color-accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  animation: fadeIn 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+/* SVG del anillo de progreso — ocupa todo el botón */
+.scroll-top__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42px;
+  height: 42px;
+}
+
+/* Círculo de fondo — sutil, siempre visible */
+.scroll-top__ring-bg {
+  stroke: var(--color-accent);
+  opacity: 0.15;
+}
+
+/* Círculo de progreso — se llena con el scroll */
+.scroll-top__ring-fill {
+  stroke: var(--color-accent);
+  transition: stroke-dashoffset 0.1s ease;  /* Suaviza el avance del anillo */
+}
+
+/* Ícono de flecha — centrado dentro del botón */
+.scroll-top__arrow {
+  width: 16px;
+  height: 16px;
+  position: relative;                       /* Por encima del SVG del anillo */
+  z-index: 1;
+}
+
+/* =============================================
    ANIMACIONES
    ============================================= */
 
@@ -892,5 +948,11 @@ body {
   /* Hover hint de ejemplo */
   .card:hover .card__hint {
     opacity: 1;
+  }
+
+  /* Hover botón volver arriba */
+  .scroll-top:hover {
+    color: var(--color-accent-light);
+    transform: translateY(-2px);
   }
 }
