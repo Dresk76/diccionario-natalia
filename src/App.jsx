@@ -587,7 +587,7 @@ export default function App() {
             />
           </svg>
 
-          {/* Ícono de flecha moderna */}
+          {/* Ícono de flecha — solo la punta, sin el palo */}
           <svg
             className="scroll-top__arrow"
             viewBox="0 0 24 24"
@@ -595,9 +595,9 @@ export default function App() {
             fill="none"
           >
             <path
-              d="M12 19V5M5 12l7-7 7 7"
+              d="M4 15l8-8 8 8"
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />

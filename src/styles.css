@@ -817,9 +817,9 @@ body {
 
 /* Ícono de flecha — centrado dentro del botón */
 .scroll-top__arrow {
-  width: 16px;
-  height: 16px;
-  position: relative;                       /* Por encima del SVG del anillo */
+  width: 20px;
+  height: 20px;
+  position: relative;
   z-index: 1;
 }
 
