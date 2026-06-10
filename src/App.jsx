@@ -46,6 +46,7 @@ export default function App() {
 
   const [showScrollTop, setShowScrollTop] = useState(false); // ← controla visibilidad del botón
   const [scrollProgress, setScrollProgress] = useState(0);   // ← progreso del scroll 0-100
+  const [surpriseId, setSurpriseId] = useState(null);          // ← id de la entrada sorpresa activa
 
   // Calcula el progreso del scroll y muestra el botón al pasar 400px
   useEffect(() => {
@@ -214,6 +215,41 @@ export default function App() {
       setCopiedId(entry.id);
       setTimeout(() => setCopiedId(null), 2000);
     });
+  };
+
+  // Selecciona una entrada al azar distinta a la actual
+  // Limpia todos los filtros, navega a la página correcta,
+  // cierra la anterior, abre la nueva y hace scroll hasta ella
+  const handleSurprise = () => {
+    // Evita repetir la misma entrada dos veces seguidas
+    const available = ENTRIES.filter((e) => e.id !== open);
+    const randomEntry = available[Math.floor(Math.random() * available.length)];
+
+    // Calcula en qué página está la entrada dentro de la lista ordenada
+    const sortedAll = [...ENTRIES].sort((a, b) =>
+      cleanForSort(a.word).localeCompare(cleanForSort(b.word), "es")
+    );
+    const entryIndex = sortedAll.findIndex((e) => e.id === randomEntry.id);
+    const targetPage = Math.floor(entryIndex / ENTRIES_PER_PAGE) + 1;
+
+    // Limpia todos los filtros para que la entrada sea visible
+    setSearch("");
+    setActiveLetter(null);
+    setActiveCategory(null);
+    setActiveYear(null);  // ← limpia el filtro de año
+    setActiveMonth(null); // ← limpia el filtro de mes
+    setSortOrder("az"); // ← resetea el orden a A→Z para que la paginación sea correcta
+
+    // Cierra la entrada anterior y abre la nueva
+    setOpen(randomEntry.id);  // ← abre la card sorpresa
+    setCurrentPage(targetPage); // ← va a la página donde está esa card
+    setSurpriseId(randomEntry.id); // ← marca la entrada para resaltarla
+
+    // Espera a que React actualice el DOM antes de hacer scroll
+    setTimeout(() => {
+      const el = document.getElementById(`card-${randomEntry.id}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 200);
   };
 
   return (
@@ -459,9 +495,11 @@ export default function App() {
 
                 {/* TARJETA DE ENTRADA */}
                 <div
-                  className={`card ${isOpen ? "card--open" : ""}`}
+                  id={`card-${entry.id}`}
+                  className={`card ${isOpen ? "card--open" : ""} ${surpriseId === entry.id ? "card--surprise" : ""}`}
                   style={{ animationDelay: `${index * 180}ms` }}
                   onClick={() => {
+                    setSurpriseId(null); // ← quita la señal al tocar la card
                     // Marca la card como vista y guarda en localStorage
                     // El pulso del + no vuelve a aparecer después de abrir
                     if (!seenCards.has(entry.id)) {
@@ -581,6 +619,15 @@ export default function App() {
         <div className="footer__divider" />
         <p className="footer__text">Compilado con amor ✦</p>
       </footer>
+
+      {/* BOTÓN SORPRÉNDEME — flotante inferior izquierdo */}
+      <button
+        className="surprise-btn"
+        onClick={handleSurprise}
+        aria-label="Entrada aleatoria"
+      >
+        ✦
+      </button>
 
       {/* BOTÓN VOLVER ARRIBA — flotante con progreso circular */}
       {showScrollTop && (

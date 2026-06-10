@@ -540,6 +540,19 @@ body {
   transform: translateY(-1px);
 }
 
+/* Card seleccionada por el botón sorpréndeme — resaltado especial */
+.card--surprise {
+  border-left-color: var(--color-accent-light);
+  box-shadow: 0 0 0 3px var(--color-accent-light), var(--card-shadow-open);
+  animation: surprisePulse 1.5s ease-in-out 3;
+}
+
+@keyframes surprisePulse {
+  0%   { box-shadow: 0 0 0 3px var(--color-accent-light), var(--card-shadow-open); }
+  50%  { box-shadow: 0 0 0 8px rgba(232, 184, 109, 0.5), var(--card-shadow-open); }
+  100% { box-shadow: 0 0 0 3px var(--color-accent-light), var(--card-shadow-open); }
+}
+
 /* Fila superior de la tarjeta: número+palabra a la izquierda, botón + a la derecha */
 .card__header {
   display: flex;
@@ -840,6 +853,35 @@ body {
 }
 
 /* =============================================
+   BOTÓN SORPRÉNDEME — flotante inferior izquierdo
+   Abre una entrada aleatoria del diccionario
+   ============================================= */
+
+/* Botón flotante fijo en esquina inferior izquierda */
+.surprise-btn {
+  position: fixed;
+  bottom: 28px;
+  left: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-header-bg);        /* Fondo oscuro igual al header */
+  color: var(--color-accent);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  animation: fadeIn 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 12px rgba(45, 26, 14, 0.25);
+}
+
+/* =============================================
    ANIMACIONES
    ============================================= */
 
@@ -970,5 +1012,13 @@ body {
   .scroll-top:hover {
     color: var(--color-accent-light);
     transform: translateY(-2px);
+  }
+
+  /* Hover botón sorpréndeme */
+  .surprise-btn:hover {
+    background: var(--color-accent);
+    color: #fff;
+    transform: translateY(-2px) rotate(30deg);
+    box-shadow: 0 4px 16px rgba(45, 26, 14, 0.3);
   }
 }
