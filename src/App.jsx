@@ -10,6 +10,19 @@ const getInitialLetter = (word) => {
   return word.replace(/^[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+/, "")[0]?.toUpperCase() ?? "?";
 };
 
+// Resalta las coincidencias del buscador dentro de un texto  ← acá
+// Divide el texto en partes y envuelve las coincidencias en un <mark>
+const highlightText = (text, query) => {
+  if (!query.trim()) return text; // Sin búsqueda — devuelve el texto normal
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const parts = text.split(regex);
+  return parts.map((part, i) =>
+    regex.test(part)
+      ? <mark key={i} className="highlight">{part}</mark>
+      : part
+  );
+};
+
 export default function App() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(null);
@@ -47,9 +60,19 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Limpia signos de puntuación al inicio para comparar correctamente
+  // Ej: "¡A peresha..." se compara como "A peresha..."
+  const cleanForSort = (word) => word.replace(/^[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+/, "");
+
+  // Convierte fecha de YYYY-MM-DD a DD-MM-YYYY para mostrar en pantalla
+  const formatDate = (dateStr) => {
+    const [year, month, day] = dateStr.split("-");
+    return `${day}-${month}-${year}`;
+  };
+
   // Entradas ordenadas según el criterio seleccionado
   const entries = [...ENTRIES].sort((a, b) => {
-    if (sortOrder === "az") return a.word.localeCompare(b.word, "es");
+    if (sortOrder === "az") return cleanForSort(a.word).localeCompare(cleanForSort(b.word), "es");
     if (sortOrder === "recent") return new Date(b.date) - new Date(a.date);
     if (sortOrder === "oldest") return new Date(a.date) - new Date(b.date);
     return 0;
@@ -423,8 +446,12 @@ export default function App() {
               <div key={entry.id}>
 
                 {/* Separador de letra — aparece cuando cambia la inicial */}
+                {/* Usa el mismo delay que su card para sincronizarse */}
                 {showSeparator && (
-                  <div className="letter-separator">
+                  <div
+                    className="letter-separator"
+                    style={{ animationDelay: `${index * 180}ms` }}
+                  >
                     <span className="letter-separator__letter">{currentLetter}</span>
                     <div className="letter-separator__line" />
                   </div>
@@ -453,7 +480,7 @@ export default function App() {
                       <span className="card__number">
                         {String(realIndex + 1).padStart(2, "0")}
                       </span>
-                      <h2 className="card__word">{entry.word}</h2>
+                      <h2 className="card__word">{highlightText(entry.word, search)}</h2>
                     </div>
                     {/* Botón + con pulso suave — pulsa solo si la card nunca fue abierta */}
                     <span className={`card__toggle ${isOpen ? "card__toggle--open" : ""} ${!isOpen && !seenCards.has(entry.id) ? "card__toggle--pulse" : ""}`}>
@@ -461,8 +488,8 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* Definición — siempre visible */}
-                  <p className="card__definition">{entry.definition}</p>
+                  {/* Definición — siempre visible, con resaltado de búsqueda */}
+                  <p className="card__definition">{highlightText(entry.definition, search)}</p>
 
                   {/* Hint "Ver ejemplo" — visible solo cuando la card está cerrada */}
                   {!isOpen && entry.example && (
@@ -477,8 +504,8 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* Fecha de registro */}
-                  <p className="card__date">{entry.date}</p>
+                  {/* Fecha de registro — mostrada en formato DD-MM-YYYY */}
+                  <p className="card__date">{formatDate(entry.date)}</p>
 
                   {/* Botones de compartir — visibles siempre */}
                   <div className="card__share">

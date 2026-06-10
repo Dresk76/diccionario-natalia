@@ -115,4 +115,12 @@ export const ENTRIES = [
     example: "Felipe siempre le daba un beso de buenos días. Un día no lo hizo. Natalia lo miró y dijo, con calma y precisión: «usted cómo ha cambiao».",
     date: "2026-06-03",
   },
+  {
+    id: "como-he-iama",
+    word: "¿Cómo he iama?",
+    category: "Cotidiano",
+    definition: "Pregunta que Natalia lanza cuando necesita el nombre de algo y ese algo se niega a aparecer en su memoria justo en ese momento. No importa si es una película, un objeto o una persona — la urgencia es la misma, y la respuesta se espera de inmediato.",
+    example: "Estaban viendo algo en la tele y Natalia, sin poder recordar el título, preguntó: «¿cómo he iama esa película?»",
+    date: "2026-06-10",
+  },
 ];

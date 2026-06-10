@@ -485,6 +485,7 @@ body {
   align-items: center;
   gap: 10px;
   margin: 20px 0 10px;
+  animation: fadeIn 0.5s ease both;
 }
 
 /* Primera aparición — sin margen superior extra */
@@ -588,6 +589,21 @@ body {
   font-size: 15px;
   line-height: 1.65;
   margin-top: 10px;
+}
+
+/* =============================================
+   RESALTADO DE BÚSQUEDA — marca las coincidencias
+   dentro de la palabra y la definición
+   ============================================= */
+
+/* Texto resaltado — fondo dorado suave sobre el texto */
+.highlight {
+  background: rgba(200, 150, 62, 0.45);
+  color: var(--color-text-primary);
+  border-radius: 2px;
+  padding: 0 2px;
+  font-style: inherit;
+  font-weight: 600;
 }
 
 /* =============================================
